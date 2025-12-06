@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surveillance System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .camera-feed {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            background-color: #000;
+        }
+
+        .result-card {
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .severity-HIGH {
+            border-left: 4px solid #ef4444;
+        }
+
+        .severity-MEDIUM {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .severity-LOW {
+            border-left: 4px solid #10b981;
+        }
+
+        .severity-NORMAL {
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* Alert styles */
+        #alertsContainer {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f7fafc;
+        }
+
+        #alertsContainer::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #alertsContainer::-webkit-scrollbar-track {
+            background: #f7fafc;
+        }
+
+        #alertsContainer::-webkit-scrollbar-thumb {
+            background-color: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .alert-item {
+            transition: all 0.2s ease;
+        }
+
+        .alert-item:hover {
+            transform: translateX(2px);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Surveillance System</h1>
+            <p class="text-gray-600">Real-time video analysis and alerting</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left column - Camera feed and controls -->
+            <div class="lg:col-span-2 space-y-4">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Live Feed</h2>
+                        <div class="space-x-2">
+                            <button id="startCamera"
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                                Start Camera
+                            </button>
+                            <button id="stopCamera" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                                disabled>
+                                Stop Camera
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="border-2 border-gray-300 rounded-lg overflow-hidden">
+                        <img id="cameraFeed" src="" alt="Camera Feed" class="camera-feed hidden">
+                        <div id="videoPlaceholder" class="flex items-center justify-center bg-gray-100 h-64">
+                            <p class="text-gray-500">Camera feed will appear here</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="flex items-center justify-center w-full">
+                            <label
+                                class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                    </svg>
+                                    <p class="mb-2 text-sm text-gray-500">
+                                        <span class="font-semibold">Click to upload</span> or drag and drop
+                                    </p>
+                                    <p class="text-xs text-gray-500">Image or Video (MP4, AVI, MOV)</p>
+                                </div>
+                                <input id="fileInput" type="file" class="hidden" accept="image/*,video/*" />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column - Alerts and results -->
+            <div class="space-y-4">
+                <!-- Alerts Section -->
+                <div class="bg-white rounded-lg shadow-md p-6 h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold">Alerts</h2>
+                        <button id="refreshAlerts" class="text-blue-600 hover:text-blue-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div id="alertsContainer" class="space-y-2 flex-1 overflow-y-auto max-h-[600px]">
+                        <!-- Alerts will be inserted here by JavaScript -->
+                        <div class="text-center text-gray-500 py-4">No alerts yet</div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4">Latest Results</h2>
+                    <div id="resultsContainer" class="space-y-3">
+                        <!-- Results will be added here -->
+                        <p class="text-gray-500 text-center py-4">No results yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const startCameraBtn = document.getElementById('startCamera');
+        const stopCameraBtn = document.getElementById('stopCamera');
+        const cameraFeed = document.getElementById('cameraFeed');
+        const videoPlaceholder = document.getElementById('videoPlaceholder');
+        const fileInput = document.getElementById('fileInput');
+        const alertsContainer = document.getElementById('alertsContainer');
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        // Event Listeners
+        startCameraBtn.addEventListener('click', startCamera);
+        stopCameraBtn.addEventListener('click', stopCamera);
+        fileInput.addEventListener('change', handleFileUpload);
+
+        // Start camera feed
+        function startCamera() {
+            // Show camera feed
+            cameraFeed.src = '/video_feed';
+            cameraFeed.classList.remove('hidden');
+            videoPlaceholder.classList.add('hidden');
+
+            // Update UI
+            startCameraBtn.disabled = true;
+            stopCameraBtn.disabled = false;
+
+            // Notify server to start camera
+            fetch('/start_camera')
+                .then(response => response.json())
+                .then(data => console.log('Camera started:', data))
+                .catch(error => console.error('Error starting camera:', error));
+        }
+
+        // Stop camera feed
+        function stopCamera() {
+            // Hide camera feed
+            cameraFeed.classList.add('hidden');
+            videoPlaceholder.classList.remove('hidden');
+
+            // Update UI
+            startCameraBtn.disabled = false;
+            stopCameraBtn.disabled = true;
+
+            // Notify server to stop camera
+            fetch('/stop_camera')
+                .then(response => response.json())
+                .then(data => console.log('Camera stopped:', data))
+                .catch(error => console.error('Error stopping camera:', error));
+        }
+
+        // Handle file upload
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(handleUploadResponse)
+                .catch(error => {
+                    console.error('Error uploading file:', error);
+                    alert('Error processing file. Please try again.');
+                });
+        }
+
+        // Handle upload response
+        function handleUploadResponse(data) {
+            if (data.error) {
+                alert(`Error: ${data.error}`);
+                return;
+            }
+
+            // Add to results
+            addResult(data);
+
+            // If this was an alert, add to alerts
+            if (data.prediction !== 'NORMAL') {
+                addAlert(data);
+            }
+        }
+
+        // Add result to results container
+        function addResult(result) {
+            if (!result || !resultsContainer) return;
+
+            try {
+                const resultElement = createResultElement(result);
+                if (!resultElement) return;
+
+                // Remove "No results" message if it exists
+                const noResults = resultsContainer.querySelector('p.text-gray-500');
+                if (noResults && noResults.parentNode === resultsContainer) {
+                    resultsContainer.removeChild(noResults);
+                }
+
+                // Add the new result
+                resultsContainer.insertBefore(resultElement, resultsContainer.firstChild);
+            } catch (error) {
+                console.error('Error adding result:', error);
+            }
+        }
+
+        // Add alert to alerts container
+        function addAlert(alert) {
+            if (!alert || !alertsContainer) return;
+
+            try {
+                const alertElement = createAlertElement(alert);
+                if (!alertElement) return;
+
+                // Remove "No alerts" message if it exists
+                const noAlerts = alertsContainer.querySelector('p.text-gray-500');
+                if (noAlerts && noAlerts.parentNode === alertsContainer) {
+                    alertsContainer.removeChild(noAlerts);
+                }
+
+                // Add the new alert
+                alertsContainer.insertBefore(alertElement, alertsContainer.firstChild);
+            } catch (error) {
+                console.error('Error adding alert:', error);
+            }
+        }
+
+        // Create result element
+        function createResultElement(result) {
+            const element = document.createElement('div');
+            element.className = `result-card p-4 rounded-lg shadow-sm border-l-4 severity-${result.severity} bg-white`;
+
+            const mediaElement = result.video_url
+                ? `<video src="${result.video_url}" controls class="w-full rounded mb-2"></video>`
+                : `<img src="${result.image_url}" alt="Result" class="w-full h-32 object-cover rounded mb-2">`;
+
+            element.innerHTML = `
+                ${mediaElement}
+                <h3 class="font-semibold">${formatLabel(result.prediction)}</h3>
+                <p class="text-sm text-gray-600 mb-1">${result.caption}</p>
+                <div class="flex justify-between items-center text-xs text-gray-500">
+                    <span>${result.timestamp}</span>
+                    <span class="px-2 py-1 rounded-full ${getSeverityColorClass(result.severity)} text-white">
+                        ${(result.confidence * 100).toFixed(1)}%
+                    </span>
+                </div>
+            `;
+
+            return element;
+        }
+
+        // Create alert element
+        function createAlertElement(alert) {
+            const element = document.createElement('div');
+            const severity = alert.severity || 'MEDIUM';
+            const timestamp = alert.timestamp || 'Just now';
+            const eventType = alert.type || 'unknown';
+            const confidence = alert.confidence ? Math.round(alert.confidence * 100) + '%' : '';
+
+            // Add emoji based on alert type
+            let emoji = '⚠️';
+            if (eventType === 'fire') emoji = '🔥';
+            else if (eventType === 'gun') emoji = '🔫';
+            else if (eventType === 'knife') emoji = '🔪';
+            else if (eventType === 'robbery') emoji = '👤';
+
+            element.className = `p-4 mb-2 rounded-lg shadow-sm ${getSeverityColorClass(severity)}`;
+            element.innerHTML = `
+                <div class="flex items-start">
+                    <span class="text-2xl mr-2">${emoji}</span>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-medium">${alert.event || 'Alert'}</h3>
+                            <span class="text-xs text-gray-500">${timestamp}</span>
+                        </div>
+                        ${confidence ? `<div class="text-sm text-gray-600">Confidence: ${confidence}</div>` : ''}
+                        ${alert.caption ? `<div class="mt-1 text-sm">${alert.caption}</div>` : ''}
+                    </div>
+                </div>
+            `;
+            return element;
+        }
+
+        // Format label for display
+        function formatLabel(label) {
+            if (!label) return 'Unknown';
+            try {
+                return String(label)
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+            } catch (e) {
+                console.error('Error formatting label:', e);
+                return String(label);
+            }
+        }
+
+        // Get severity color class
+        function getSeverityColorClass(severity) {
+            const colors = {
+                'HIGH': 'bg-red-500',
+                'MEDIUM': 'bg-yellow-500',
+                'LOW': 'bg-green-500',
+                'NORMAL': 'bg-blue-500'
+            };
+            return colors[severity] || 'bg-gray-500';
+        }
+
+        // Alert update function
+        function updateAlerts() {
+            fetch('/recent_alerts')
+                .then(response => response.json())
+                .then(alerts => {
+                    const alertsContainer = document.getElementById('alertsContainer');
+                    if (!alertsContainer) return;
+
+                    // Clear existing alerts
+                    alertsContainer.innerHTML = '';
+
+                    if (alerts.length === 0) {
+                        alertsContainer.innerHTML = '<div class="text-center text-gray-500 py-4">No alerts yet</div>';
+                        return;
+                    }
+
+                    // Add each alert
+                    alerts.forEach(alert => {
+                        const alertElement = createAlertElement(alert);
+                        alertsContainer.appendChild(alertElement);
+                    });
+                })
+                .catch(error => console.error('Error fetching alerts:', error));
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set up alert refresh
+            const refreshButton = document.getElementById('refreshAlerts');
+            if (refreshButton) {
+                refreshButton.addEventListener('click', updateAlerts);
+            }
+
+            // Initial load and set up auto-refresh
+            updateAlerts();
+            setInterval(updateAlerts, 5000); // Update every 5 seconds
+
+            // Initialize other components
+            loadAlerts();
+        });
+    </script>
+</body>
+
+</html>

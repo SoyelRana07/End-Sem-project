@@ -1,0 +1,165 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+.venv
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Models and data
+saved_model/
+*.pth
+*.pth.*
+*.h5
+*.hdf5
+*.pt
+*.pkl
+*.joblib
+*.npy
+*.npz
+*.safetensors
+
+# Alerts and logs
+alerts/*.jpg
+alerts/*.mp4
+alerts/*.png
+alerts/*.json
+logs/
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# Project specific
+data/
+*.db
+*.sqlite3
+*.sqlite
+
+# Media files
+static/*.mp4
+static/*.mp3
+static/*.wav
+static/*.mov
+static/*.avi
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation
+_build/
+docs/_build/
+*.docx
+*.pdf
+*.xlsx
+
+# Local development
+local_settings.py
+local_config.py
+
+# Build and release
+*.whl
+*.tar.gz
+*.egg
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PyCharm
+.idea/
+
+# Virtual environment
+venv/
+ENV/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
